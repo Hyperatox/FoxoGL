@@ -1,0 +1,6 @@
+[submodule "vendor/glfw"]
+	path = vendor/glfw
+	url = https://github.com/glfw/glfw
+[submodule "vendor/glad2"]
+	path = vendor/glad2
+	url = https://github.com/anthofoxo/glad2-pregen

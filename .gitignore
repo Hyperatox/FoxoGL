@@ -1,0 +1,13 @@
+/bin
+/bin-int
+/.vs
+/.ds
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.workspace
+*.xcworkspace
+*.project
+*.xcodeproj
+Makefile
