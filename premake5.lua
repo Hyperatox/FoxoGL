@@ -47,8 +47,8 @@ ProjectHelper "project"
 
 	files
 	{
-		"%{prj.location}/src/**.cpp",
-		"%{prj.location}/src/**.h"
+		"%{prj.location}/**.cpp",
+		"%{prj.location}/**.h"
 	}
 
 	includedirs
