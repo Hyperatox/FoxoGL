@@ -8,7 +8,7 @@ layout (location = 0) in vec2 vert_Position;
 
 void main(void)
 {
-	gl_Position = vec4(vert_Position,0.0 ,1.0 );
+	gl_Position = vec4(-vert_Position, 0.0 ,1.0 );
 }
 )---";
 
@@ -33,7 +33,7 @@ int main() {
 	GLuint vbo;
 
 	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);//OwO
+	glBindVertexArray(vao);//happy fox noises
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vert), vert, GL_STATIC_DRAW);
