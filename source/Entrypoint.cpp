@@ -182,6 +182,7 @@ int main() {
 
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 			glClearColor(((float)rand() / (float)RAND_MAX), .8f, .8f, 1.0f);
+
 			glUniform1i(location1, 1);
 		}
 		else {
@@ -268,7 +269,7 @@ bool ImageWoW() {
 	char pRGB[3];
 	char image[height * width * 3];
 
-	int u = 0;
+	
 	for (int j = 0; j < height * width *3; j+=3) {//FUCK THIS almost 4 am and i got it right
 		HEADER_PIXEL(pImg, pRGB)
 
@@ -276,9 +277,19 @@ bool ImageWoW() {
 			image[j+1] = pRGB[1];
 			image[j+2] = pRGB[2];
 
-			std::cout << image[j] << " " << u << std::endl;
-			u++;
 	}
+
+	/*
+	for (int j = height * width * 3; j >= 3; j -= 3) {//normal orientation but with a cool error that does not do anything
+		HEADER_PIXEL(pImg, pRGB)
+
+		image[j]     = pRGB[0];
+		image[j - 2] = pRGB[1];
+		image[j - 1] = pRGB[2];
+
+		//std::cout << image[j] << " " << j << std::endl;
+
+	}*/
 
 
 
