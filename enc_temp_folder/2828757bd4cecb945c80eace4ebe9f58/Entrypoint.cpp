@@ -269,7 +269,7 @@ bool ImageWoW() {
 	char image[height * width * 3];
 
 	int u = 0;
-	for (int j = 0; j < height * width *3; j+=3) {//FUCK THIS almost 4 am and i got it right
+	for (int j = 0; j < height * width *3; j+=3) {
 		HEADER_PIXEL(pImg, pRGB)
 
 			image[j] = pRGB[0];
