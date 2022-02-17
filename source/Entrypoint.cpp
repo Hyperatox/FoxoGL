@@ -1,6 +1,8 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#include "amazing-fox-photo-182.h"
+#include "evensmaller.c"
 
 #if defined(_MSC_VER)
 #	include <Windows.h>
@@ -10,30 +12,46 @@ static const char* s_VertexSource = R"---(
 #version 330 core
 layout (location = 0) in vec2 vert_Position;
 layout (location = 1) in vec3 vert_Color;
+layout (location = 2) in vec2 aTexCoord;
 
 out vec3 frag_Color;
+out vec2 TexCoord;
 
 void main(void)
 {
 	gl_Position = vec4(vert_Position, 0.0, 1.0);
 	frag_Color = vert_Color;
+	TexCoord = aTexCoord;
 }
 )---";
 
 static const char* s_FragmentSource = R"---(
 #version 330 core
 layout (location = 0) out vec4 out_Color;
+layout (location = 1) out vec4 FragColor;
+//out vec4 FragColor;
 
 in vec3 frag_Color;
+in vec2 TexCoord;
 
+uniform bool ShowIMG;
 uniform vec3 u_Color;
+uniform sampler2D ourTexture;
 
 void main(void)
 {
+	//FragColor = texture(ourTexture, TexCoord);
 	out_Color = vec4(frag_Color, 1.0);
+	if(ShowIMG){
+		out_Color = texture(ourTexture, TexCoord);
+	}
+	
+	
+
 }
 )---";
-
+GLuint textureInt;
+bool ImageWoW();
 void CheckShaderError(GLuint shader) noexcept {
 	GLint status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -76,15 +94,18 @@ int main() {
 	glfwMakeContextCurrent(window);
 	gladLoadGL(&glfwGetProcAddress);
 
-	//layout (position xy) (color rgb)
+	//layout (position xy) (color rgb) (Texture coords)
 	int vertcount = 6;
 	float vert[] = {
-	-.5f, +.5f, .0f, .0f, 1.0f,
-	-.5f, -.5f, .0f, 1.0f, .0f,
-	+.5f, +.5f, 1.0f, .0f, .0f,
-	+.5f, +.5f, 1.0f, 0.0f, .0f,
-	-.5f, -.5f, 0.0f, 1.0f, .0f,
-	+.5f, -.5f, 1.0f, 0.5f, .0f,
+	//positions         //colors               //texture coords
+	//0
+	-.5f, +.5f,        .0f, .0f, 1.0f,          0.0f, 1.0f,//top left 
+	-.5f, -.5f,        .0f, 1.0f, .0f,          0.0f, 0.0f,//bottom left
+	+.5f, +.5f,        1.0f, .0f, .0f,          1.0f, 1.0f,//top right
+	//1
+	+.5f, +.5f,        1.0f, .0f, .0f,          1.0f, 1.0f,//top right
+	-.5f, -.5f,        .0f, 1.0f, .0f,          0.0f, 0.0f,//bottom left
+	+.5f, -.5f,        1.0f, .5f, .0f,          1.0f, 0.0f,//bottom right
 	};
 	GLuint vao;
 	GLuint vbo;
@@ -95,12 +116,25 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vert), vert, GL_STATIC_DRAW);
 
+	/* org
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5 , 0);
 	glEnableVertexAttribArray(0);
 	
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5 , (const void*)( 2 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	*/
 
+	//mod  
+	//(type of change, floats total in row for type ,normal , floats total in row?, offset  )
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(0 * sizeof(float)));
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(5 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	//mod
 	
 
 	GLuint vertShader, fragShader;
@@ -115,9 +149,6 @@ int main() {
 
 	CheckShaderError(vertShader);
 	CheckShaderError(fragShader);
-
-
-	
 
 	GLuint program = glCreateProgram();
 	glAttachShader(program, vertShader);
@@ -135,19 +166,27 @@ int main() {
 
 	glUseProgram(program);
 
-	GLint location =  glGetUniformLocation(program, "u_Color");
-	glUniform3f(location, 0.6f, 0.2f, 0.2f);
+	GLint location0 =  glGetUniformLocation(program, "u_Color");
+	glUniform3f(location0, 0.6f, 0.2f, 0.2f);
+	
+	GLint location1 =  glGetUniformLocation(program, "ShowIMG");
+	glUniform1i(location1, 0);
 
 
+	//mod
+	ImageWoW();
+	//mod
 
 	while(!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 			glClearColor(((float)rand() / (float)RAND_MAX), .8f, .8f, 1.0f);
+			glUniform1i(location1, 1);
 		}
 		else {
 			glClearColor(((float)rand() / (float)RAND_MAX), .0f, .0f, 1.0f);
+			glUniform1i(location1, 0);
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -161,4 +200,127 @@ int main() {
 	glDeleteBuffers(1, &vbo);
 	glDeleteProgram(program);
 	glfwTerminate();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+		-^^,--,~
+
+  __
+ / _|
+| |_ _____  __
+|  _/ _ \ \/ /
+| || (_) >  <
+|_| \___/_/\_\
+
+  _,-=._              /|_/|
+  `-.}   `=._,.-=-._.,  @ @._,
+	 `._ _,-.   )      _,.-'
+		`    G.m-"^m`m'
+
+*/
+
+
+
+bool ImageWoW() {
+
+	char* pImg = (char*)header_data;
+	char pRGB[3];
+	char image[height * width * 3];
+
+
+	for (int j = 0; j < height * width; j+=3) {
+		HEADER_PIXEL(pImg, pRGB)
+
+			image[j] = pRGB[0];
+			image[j+1] = pRGB[1];
+			image[j+2] = pRGB[2];
+
+	}
+
+
+	/*
+	int u = 0;
+	for (int j = 0; j < height * width; j++) {
+		HEADER_PIXEL(pImg, pRGB)
+
+			image[u] = pRGB[0];
+		u++;
+	}
+	std::cout << u << std::endl;
+	for (int j = 0; j < height * width; j++) {
+		HEADER_PIXEL(pImg, pRGB)
+
+			image[u] = pRGB[1];
+		u++;
+	}
+	std::cout << u << std::endl;
+	for (int j = 0; j < height * width; j++) {
+		HEADER_PIXEL(pImg, pRGB)
+
+			image[u] = pRGB[2];
+		u++;
+	}
+	std::cout << u << std::endl;
+	*/
+
+	// Create one OpenGL texture
+	glGenTextures(1, &textureInt);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureInt);
+
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+
+	return true;
 }
